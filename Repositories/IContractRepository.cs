@@ -6,6 +6,6 @@ public interface IContractRepository
     Task UpdateAsync(Contract contract);
     Task DeleteAsync(int id);
 
-    Task<Car?> GetCarByPlateAsync(string plate);
+    Task<Car?> GetCarByPlateAsync(int plate);
     Task<Customer?> GetCustomerByFullNameAsync(string? first, string? middle, string? last);
 }

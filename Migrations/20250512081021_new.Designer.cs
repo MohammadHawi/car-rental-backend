@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace danielrent_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250415230212_Nationality")]
-    partial class Nationality
+    [Migration("20250512081021_new")]
+    partial class @new
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,6 +45,9 @@ namespace danielrent_backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Plate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -82,14 +85,13 @@ namespace danielrent_backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("float")
-                        .HasDefaultValue(0.0);
+                        .HasColumnType("float");
 
                     b.Property<int?>("Returned")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -133,18 +135,11 @@ namespace danielrent_backend.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NationalityId");
-
-                    b.HasIndex("PhoneNumber")
-                        .IsUnique();
-
-                    b.HasIndex("FirstName", "MiddleName", "LastName")
-                        .IsUnique()
-                        .HasFilter("[MiddleName] IS NOT NULL");
 
                     b.ToTable("Customers");
                 });
@@ -165,6 +160,86 @@ namespace danielrent_backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Nationality");
+                });
+
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("TransactionCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("ContractId");
+
+                    b.HasIndex("TransactionCategoryId");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("TransactionCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TransactionCategory");
                 });
 
             modelBuilder.Entity("Contract", b =>
@@ -197,9 +272,39 @@ namespace danielrent_backend.Migrations
                     b.Navigation("Nationality");
                 });
 
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.HasOne("Car", "Car")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CarId");
+
+                    b.HasOne("Contract", "Contract")
+                        .WithMany("Transactions")
+                        .HasForeignKey("ContractId");
+
+                    b.HasOne("TransactionCategory", "TransactionCategory")
+                        .WithMany("Transactions")
+                        .HasForeignKey("TransactionCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Car");
+
+                    b.Navigation("Contract");
+
+                    b.Navigation("TransactionCategory");
+                });
+
             modelBuilder.Entity("Car", b =>
                 {
                     b.Navigation("Contracts");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Contract", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Customer", b =>
@@ -210,6 +315,11 @@ namespace danielrent_backend.Migrations
             modelBuilder.Entity("Nationality", b =>
                 {
                     b.Navigation("Customers");
+                });
+
+            modelBuilder.Entity("TransactionCategory", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

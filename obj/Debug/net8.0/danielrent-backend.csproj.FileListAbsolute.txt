@@ -153,6 +153,7 @@ C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\dan
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\danielrent-backend.csproj.CoreCompileInputs.cache
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\danielrent-backend.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\danielrent-backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\danielrent-backend.sourcelink.json
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\mohammad\Desktop\New folder (2)\danielrent-backend\obj\Debug\net8.0\staticwebassets\msbuild.danielrent-backend.Microsoft.AspNetCore.StaticWebAssets.props

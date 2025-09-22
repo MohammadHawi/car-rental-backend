@@ -1,8 +1,8 @@
 public class ContractRequestDto
 {
-    public string? Car { get; set; } // Plate number
+    public int? Car { get; set; } // Plate number
     public string? Name { get; set; } // Existing customer's full name
-
+    public int? Cid { get; set; } // Existing customer ID
     public string? FirstName { get; set; }  // For new customer
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }

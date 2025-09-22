@@ -9,55 +9,67 @@ public class ContractRepository : IContractRepository
         _context = context;
     }
 
-    public async Task<(IEnumerable<ContractResponseDto> Items, int TotalCount)> GetAllAsync(int pageNumber, int pageSize, string? searchQuery = null)
+    public async Task<(IEnumerable<ContractResponseDto> Items, int TotalCount)> GetAllAsync(
+    int pageNumber,
+    int pageSize,
+    string? searchQuery = null)
     {
+        var now = DateTime.Now;
+
         var query = _context.Contracts
-        .Include(c => c.Car)
-        .Include(c => c.Customer)
-        .Where(c => c.Returned == 0)
-        .AsQueryable();
+            .Include(c => c.Car)
+            .Include(c => c.Customer)
+            .Where(c => c.Returned == 0)
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            query = query.Where(c => c.Cid.ToString().Contains(searchQuery) || c.CarId.ToString().Contains(searchQuery));
+            query = query.Where(c =>
+                (c.Customer.FirstName + " " + c.Customer.MiddleName + " " + c.Customer.LastName).Contains(searchQuery) ||
+                c.Car.Plate.ToString().Contains(searchQuery));
         }
 
         var totalCount = await query.CountAsync();
-        var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+
+        var rawItems = await query
             .Select(contract => new ContractResponseDto
             {
                 Id = contract.Id,
                 CarId = contract.CarId,
                 Cid = contract.Cid,
                 CarPlate = contract.Car != null ? contract.Car.Plate.ToString() : null,
-                CustomerName = (contract.Customer != null 
-                    ? $"{contract.Customer.FirstName} {contract.Customer.MiddleName} {contract.Customer.LastName}" 
+                CustomerName = (contract.Customer != null
+                    ? $"{contract.Customer.FirstName} {contract.Customer.MiddleName} {contract.Customer.LastName}"
                     : string.Empty).Trim(),
                 Price = contract.Price,
                 CheckIn = contract.CheckIn,
                 CheckOut = contract.CheckOut,
                 Deposit = contract.Deposit,
                 Paid = contract.Paid,
-                PhoneNumber = contract.Customer != null ? contract.Customer.PhoneNumber : null  ,
-                Status = (contract.CheckIn.HasValue && DateTime.Now > contract.CheckIn.Value.ToDateTime(TimeOnly.MinValue))
-                ? 2 // Overdue
-                : contract.Status,
+                PhoneNumber = contract.Customer != null ? contract.Customer.PhoneNumber : null,
+                Status = (contract.CheckIn.HasValue && now > contract.CheckIn.Value.ToDateTime(TimeOnly.MinValue))
+                    ? 2
+                    : contract.Status,
                 Total = (contract.CheckIn.HasValue && contract.CheckOut.HasValue)
                     ? (int)(contract.Price * (contract.CheckIn.Value.DayNumber - contract.CheckOut.Value.DayNumber))
                     : 0,
-                    
                 Balance = (contract.CheckIn.HasValue && contract.CheckOut.HasValue)
-                    ? (int)(contract.Price * (contract.CheckIn.Value.DayNumber - contract.CheckOut.Value.DayNumber) - contract.Paid ?? 0)
+                    ? (int)(contract.Price * (contract.CheckIn.Value.DayNumber - contract.CheckOut.Value.DayNumber)
+                        - (contract.Paid ?? 0))
                     : 0,
-
-
             })
             .ToListAsync();
 
-        return (items, totalCount);
+        var sortedItems = rawItems
+            .OrderBy(c => c.Status)
+            .ThenBy(c => c.CheckIn)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (sortedItems, totalCount);
     }
+
 
 
     public async Task<Contract> GetByIdAsync(int id)
@@ -82,14 +94,15 @@ public class ContractRepository : IContractRepository
         var contract = await GetByIdAsync(id);
         if (contract != null)
         {
+            // _context.Transactions.Remove(contract.Transactions);
             _context.Contracts.Remove(contract);
             await _context.SaveChangesAsync();
         }
     }
 
-    public async Task<Car?> GetCarByPlateAsync(string plate)
+    public async Task<Car?> GetCarByPlateAsync(int plate)
     {
-        if (int.TryParse(plate, out int plateNumber))
+        if (int.TryParse(plate.ToString(), out int plateNumber))
         {
             return await _context.Cars.FirstOrDefaultAsync(c => c.Plate == plateNumber);
         }

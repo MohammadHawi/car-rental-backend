@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace danielrent_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250312181356_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250516210834_AddTasksTable")]
+    partial class AddTasksTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,6 +45,9 @@ namespace danielrent_backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Plate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -82,14 +85,13 @@ namespace danielrent_backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("float")
-                        .HasDefaultValue(0.0);
+                        .HasColumnType("float");
 
                     b.Property<int?>("Returned")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -160,6 +162,102 @@ namespace danielrent_backend.Migrations
                     b.ToTable("Nationality");
                 });
 
+            modelBuilder.Entity("ToDoTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CompletedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsImportant")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DueDate");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("ContractId");
+
+                    b.ToTable("Transactions");
+                });
+
             modelBuilder.Entity("Contract", b =>
                 {
                     b.HasOne("Car", "Car")
@@ -190,9 +288,31 @@ namespace danielrent_backend.Migrations
                     b.Navigation("Nationality");
                 });
 
+            modelBuilder.Entity("Transaction", b =>
+                {
+                    b.HasOne("Car", "Car")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CarId");
+
+                    b.HasOne("Contract", "Contract")
+                        .WithMany("Transactions")
+                        .HasForeignKey("ContractId");
+
+                    b.Navigation("Car");
+
+                    b.Navigation("Contract");
+                });
+
             modelBuilder.Entity("Car", b =>
                 {
                     b.Navigation("Contracts");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Contract", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Customer", b =>

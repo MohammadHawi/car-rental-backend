@@ -20,4 +20,16 @@
             var (cars, totalCount) = await _carService.GetAllCarsAsync(pageNumber, pageSize, searchQuery);
             return Ok(new { cars, totalCount });
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Car>> GetCarById(int id)
+        {
+            var car = await _carService.GetCarByIdAsync(id);
+            if (car == null)
+            {
+                return NotFound();
+            }
+            return Ok(car);
+        }
+
     }

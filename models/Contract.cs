@@ -25,4 +25,6 @@ public class Contract
     public string? Note { get; set; }
     public int? Returned { get; set; }   // 1 for returned, 0 for not returned
     public int Status { get; set; }   // 1 --> active  2--> overdue 3--> closed (then return = 1)
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
 }
