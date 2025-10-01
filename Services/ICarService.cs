@@ -5,4 +5,7 @@ public interface ICarService
     Task AddCarAsync(Car car);
     Task UpdateCarAsync(Car car);
     Task DeleteCarAsync(int id);
+    Task UpdateCarStatusAsync(int carId, int status);
+    Task<int?> GetCarStatusAsync(int carId);
+    Task<CarHistoryDto> GetCarHistoryAsync(int carId);
 }

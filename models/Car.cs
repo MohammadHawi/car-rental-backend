@@ -17,9 +17,9 @@ public class Car
     public int? Model { get; set; }
 
     public string? Color { get; set; }
-    public int Status { get; set; } // 0 = available, 1 = rented , 2 = in maintenance
     public ICollection<Contract> Contracts { get; set; } = new List<Contract>();  // A car can have many contracts
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public CarStatus? CarStatus { get; set; } // One-to-one relationship
 
 
 }

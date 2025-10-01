@@ -10,12 +10,56 @@ public class ContractRepository : IContractRepository
     }
 
     public async Task<(IEnumerable<ContractResponseDto> Items, int TotalCount)> GetAllAsync(
-    int pageNumber,
-    int pageSize,
-    string? searchQuery = null)
+        int pageNumber,
+        int pageSize,
+        string? searchQuery = null)
     {
         var now = DateTime.Now;
 
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        // Contracts ending today
+        var contractsEndingToday = await _context.Contracts
+            .Where(c => c.Returned == 0 &&
+                        c.Status == 1 &&
+                        c.CheckIn.HasValue &&
+                        c.CheckIn.Value == today)
+            .ToListAsync();
+
+        // Contracts overdue
+        var overdueContracts = await _context.Contracts
+            .Where(c => c.Returned == 0 &&
+                        (c.Status == 1 || c.Status == 3)  &&
+                        c.CheckIn.HasValue &&
+                        c.CheckIn.Value < today)
+            .ToListAsync();
+
+
+        // Update contracts ending today
+        if (contractsEndingToday.Any())
+        {
+            foreach (var contract in contractsEndingToday)
+            {
+                contract.Status = 3; // Mark as ending today
+            }
+        }
+
+        // Update overdue contracts
+        if (overdueContracts.Any())
+        {
+            foreach (var contract in overdueContracts)
+            {
+                contract.Status = 2; // Mark as overdue
+            }
+        }
+
+        // Save all changes at once
+        if (contractsEndingToday.Any() || overdueContracts.Any())
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        // Now proceed with the normal query
         var query = _context.Contracts
             .Include(c => c.Car)
             .Include(c => c.Customer)
@@ -47,9 +91,7 @@ public class ContractRepository : IContractRepository
                 Deposit = contract.Deposit,
                 Paid = contract.Paid,
                 PhoneNumber = contract.Customer != null ? contract.Customer.PhoneNumber : null,
-                Status = (contract.CheckIn.HasValue && now > contract.CheckIn.Value.ToDateTime(TimeOnly.MinValue))
-                    ? 2
-                    : contract.Status,
+                Status = contract.Status, // Now this will be correct since we updated it above
                 Total = (contract.CheckIn.HasValue && contract.CheckOut.HasValue)
                     ? (int)(contract.Price * (contract.CheckIn.Value.DayNumber - contract.CheckOut.Value.DayNumber))
                     : 0,
@@ -69,7 +111,6 @@ public class ContractRepository : IContractRepository
 
         return (sortedItems, totalCount);
     }
-
 
 
     public async Task<Contract> GetByIdAsync(int id)

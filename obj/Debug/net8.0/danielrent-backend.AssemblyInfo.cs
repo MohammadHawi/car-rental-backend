@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("danielrent-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0e08b5890040cc2f5706f037e3d088985fbc38e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5863a2b0b2bd8b7975745da69bf4ca0fb1bf53bc")]
 [assembly: System.Reflection.AssemblyProductAttribute("danielrent-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("danielrent-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

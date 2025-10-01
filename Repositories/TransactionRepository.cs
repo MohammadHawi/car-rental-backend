@@ -58,14 +58,25 @@ using System.Threading.Tasks;
 
             return transaction;
         }
+        
+        public async Task<IEnumerable<Transaction>> GetTransactionsByCarIdAsync(int carId)
+        {
+            return await _context.Transactions
+                .Include(t => t.Contract)
+                .Include(t => t.Car)
+                .Where(t => t.CarId == carId)
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
+        }
+
 
         public async Task<Transaction> CreateTransactionAsync(Transaction transaction)
-        {
-            transaction.CreatedAt = DateTime.UtcNow;
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
-            return transaction;
-        }
+    {
+        transaction.CreatedAt = DateTime.UtcNow;
+        _context.Transactions.Add(transaction);
+        await _context.SaveChangesAsync();
+        return transaction;
+    }
 
         public async Task<Transaction> UpdateTransactionAsync(Transaction transaction)
         {

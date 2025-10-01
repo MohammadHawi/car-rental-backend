@@ -84,9 +84,9 @@ public class ContractService : IContractService
             var car = await _contractRepository.GetCarByPlateAsync((int)dto.Car);
             if (car == null)
                 throw new Exception("Car not found.");
-            car.Status = 1;
-            await _carRepository.UpdateAsync(car);
-
+            // car.Status = 1;
+            // await _carRepository.UpdateAsync(car);
+            await _carRepository.UpdateCarStatusAsync(car.Id, 1);
             Customer? customer = null;
 
             if (dto.Cid == null)
@@ -188,6 +188,7 @@ public class ContractService : IContractService
         contract.Status = 3; // Mark as closed
 
         await _contractRepository.UpdateAsync(contract);
+        await _carRepository.UpdateCarStatusAsync(contract.CarId, 0); // Set car status to available (0)
     }
     
     public async Task ExtendContract(int contractId, DateTime checkInDate)
